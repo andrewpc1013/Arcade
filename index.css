@@ -18,6 +18,13 @@ body {
     padding: 0px;
 }
 
+button {
+    background-color: rgb(21, 21, 59);
+    border: white solid 2px;
+    color: white;
+    margin: 10px;
+}
+
 .start-menu {
     display: flex;
     background-color: rgb(21, 21, 59);
@@ -28,14 +35,30 @@ body {
 
 #start-button {
     padding: 10px;
-    font-size: 5em;
+    font-size: 60px;
     font-family: impact;
 }
 
 #options-button {
     padding: 10px;
-    font-size: 3.5em;
+    font-size: 60px;
     font-family: impact;
+}
+
+.options-menu {
+    padding: 10px;
+    font-size: 40px;
+    font-family: impact;
+    align-items: center;
+}
+
+#difficulty-input {
+    font-size: 40px;
+}
+
+#options-menu-block {
+    display: none;
+    flex-direction: column;
 }
 
 #game-area {
@@ -58,16 +81,16 @@ body {
     width: 100%;
 }
 
-#restart-button {
+/* #restart-button {
     background-color: rgb(21, 21, 59);
     border: white solid 2px;
     padding: 10px;
     margin: 10px;
-    font-size: 2em;
+    font-size: 40px;
     color: white;
     font-family: impact;
     display: none;
-}
+} */
 
 tr {
     padding: 0px;
@@ -118,5 +141,16 @@ td {
     color: white;
     text-decoration: underline;
     margin: 0px;
+    display: none;
+}
+
+button.lose-menu {
+    background-color: rgb(21, 21, 59);
+    border: white solid 2px;
+    padding: 10px;
+    margin: 10px;
+    font-size: 40px;
+    color: white;
+    font-family: impact;
     display: none;
 }

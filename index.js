@@ -1,6 +1,10 @@
 const startMenu = document.getElementsByClassName("start-menu");
 const startButton = document.getElementById("start-button");
 const optionsButton = document.getElementById("options-button");
+const optionsMenu = document.getElementsByClassName("options-menu");
+const difficultyInput = document.getElementById("difficulty-input");
+const mainMenuButton1 = document.getElementById("main-menu-button-1");
+const mainMenuButton2 = document.getElementById("main-menu-button-2");
 const gameInfo = document.getElementsByClassName("game-info");
 const scoreDisplay = document.getElementById("score-display");
 const highScoreDisplay = document.getElementById("high-score-display");
@@ -19,6 +23,7 @@ let numRows = 15;
 let numColumns = 15;
 let snake = {};
 let gameTickID;
+let difficulty = 5;
 let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
@@ -26,6 +31,8 @@ let applePosition = [0,0];
 
 startButton.addEventListener("click", startGame);
 optionsButton.addEventListener("click", openOptionsMenu);
+mainMenuButton1.addEventListener("click", openMainMenu);
+mainMenuButton2.addEventListener("click", openMainMenu);
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", changeDirection);
 
@@ -37,11 +44,16 @@ function startGame() {
     currentScore = 0;
     scoreDisplay.innerText = `Score: ${currentScore}`;
 
+    updateDifficulty();
+
     hideElement(startMenu);
     hideElement(loseMenu);
+    if (table.children.length > 0) {
+        destroyGrid();
+    }
     createGrid(numRows, numColumns);
-    showGameArea();
-    showGameInfo();
+    showElement(gameArea, "self");
+    showElement(gameInfo);
 
     const startRow = Math.floor(Math.random() * (numRows - 2));
     const startColumn = Math.floor(Math.random() * numColumns);
@@ -95,52 +107,40 @@ function destroyGrid() {
     table.innerHTML = "";
 }
 
-function showGameArea() {
-    gameArea.style.display = "block";
-}
-
-function hideGameArea() {
-    gameArea.style.display = "none";
-}
-
-function showElement(element) {
-    for (let i = 0; i < element.length; i++) {
-        element[i].style.display = "flex";
+function showElement(element, selection) {
+    if (selection === undefined || selection === "all") {
+        for (let i = 0; i < element.length; i++) {
+            element[i].style.display = "flex";
+        }
+    }
+    else if (selection === "self") {
+        element.style.display = "flex";
     }
 }
 
-function hideElement(element) {
-    for (let i = 0; i < element.length; i++) {
-        element[i].style.display = "none";
+function hideElement(element, selection) {
+    if (selection === undefined || selection === "all") {
+        for (let i = 0; i < element.length; i++) {
+            element[i].style.display = "none";
+        }
     }
-}
-
-function showLoseMenu() {
-    for (let i = 0; i < loseMenu.length; i++) {
-        loseMenu[i].style.display = "flex";
-    }
-}
-
-function hideLoseMenu() {
-    for (let i = 0; i < loseMenu.length; i++) {
-        loseMenu[i].style.display = "none";
-    }
-}
-
-function showGameInfo() {
-    for (let i = 0; i < gameInfo.length; i++) {
-        gameInfo[i].style.display = "flex";
-    }
-}
-
-function hideGameInfo() {
-    for (let i = 0; i < gameInfo.length; i++) {
-        gameInfo[i].style.display = "none";
+    else if (selection === "self") {
+        element.style.display = "none";
     }
 }
 
 function openOptionsMenu() {
-    console.log("options");
+    hideElement(startMenu);
+    showElement(optionsMenu);
+}
+
+function openMainMenu() {
+    hideElement(optionsMenu);
+    hideElement(loseMenu);
+    hideElement(gameInfo);
+    hideElement(gameArea, "self");
+    hideElement(table);
+    showElement(startMenu);
 }
 
 function createSnakeSegment(row, column) {
@@ -318,4 +318,24 @@ function eatApple() {
     createApple();
 
     increaseSnakeLength(1);
+}
+
+function updateDifficulty() {
+    difficulty = difficultyInput.value;
+
+    let speeds = {
+        1: 370,
+        2: 310,
+        3: 260,
+        4: 210,
+        5: 170,
+        6: 130,
+        7: 100,
+        8: 70,
+        9: 50
+    }
+
+    tickSpeed = speeds[difficulty];
+
+    console.log(tickSpeed);
 }

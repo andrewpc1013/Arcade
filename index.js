@@ -1,5 +1,6 @@
 const startMenu = document.getElementsByClassName("start-menu");
 const startButton = document.getElementById("start-button");
+const optionsButton = document.getElementById("options-button");
 const gameInfo = document.getElementsByClassName("game-info");
 const scoreDisplay = document.getElementById("score-display");
 const highScoreDisplay = document.getElementById("high-score-display");
@@ -18,12 +19,13 @@ let numRows = 15;
 let numColumns = 15;
 let snake = {};
 let gameTickID;
-let tickSpeed = 200;
+let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
 let applePosition = [0,0];
 
 startButton.addEventListener("click", startGame);
+optionsButton.addEventListener("click", openOptionsMenu);
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", changeDirection);
 
@@ -35,8 +37,8 @@ function startGame() {
     currentScore = 0;
     scoreDisplay.innerText = `Score: ${currentScore}`;
 
-    hideStartMenu();
-    hideLoseMenu();
+    hideElement(startMenu);
+    hideElement(loseMenu);
     createGrid(numRows, numColumns);
     showGameArea();
     showGameInfo();
@@ -101,15 +103,15 @@ function hideGameArea() {
     gameArea.style.display = "none";
 }
 
-function showStartMenu() {
-    for (let i = 0; i < startMenu.length; i++) {
-        startMenu[i].style.display = "flex";
+function showElement(element) {
+    for (let i = 0; i < element.length; i++) {
+        element[i].style.display = "flex";
     }
 }
 
-function hideStartMenu() {
-    for (let i = 0; i < startMenu.length; i++) {
-        startMenu[i].style.display = "none";
+function hideElement(element) {
+    for (let i = 0; i < element.length; i++) {
+        element[i].style.display = "none";
     }
 }
 
@@ -135,6 +137,10 @@ function hideGameInfo() {
     for (let i = 0; i < gameInfo.length; i++) {
         gameInfo[i].style.display = "none";
     }
+}
+
+function openOptionsMenu() {
+    console.log("options");
 }
 
 function createSnakeSegment(row, column) {
@@ -245,6 +251,9 @@ function changeDirection(event) {
     else if (keyPressed === 40 || keyPressed === 83) {
         newDirection = [1, 0]; //down
     }
+    else {
+        newDirection = snake.nextDirection;
+    }
 
     let snakeNeckRow = snake.body[snake.body.length - 2][0];
     let snakeNeckColumn = snake.body[snake.body.length - 2][1];
@@ -262,9 +271,7 @@ function changeDirection(event) {
 function loseGame() {
     clearInterval(gameTickID);
 
-    showLoseMenu();
-
-    console.log("lost");
+    showElement(loseMenu);
 }
 
 function increaseScore(amount) {
@@ -311,5 +318,4 @@ function eatApple() {
     createApple();
 
     increaseSnakeLength(1);
-    console.log("scored");
 }

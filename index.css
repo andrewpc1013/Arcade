@@ -20,14 +20,21 @@ body {
 
 .start-menu {
     display: flex;
+    background-color: rgb(21, 21, 59);
+    border: white solid 2px;
+    color: white;
+    margin: 10px;
 }
 
 #start-button {
-    background-color: rgb(21, 21, 59);
-    border: white solid 2px;
     padding: 10px;
     font-size: 5em;
-    color: white;
+    font-family: impact;
+}
+
+#options-button {
+    padding: 10px;
+    font-size: 3.5em;
     font-family: impact;
 }
 

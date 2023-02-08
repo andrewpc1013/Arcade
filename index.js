@@ -3,6 +3,7 @@ const startButton = document.getElementById("start-button");
 const optionsButton = document.getElementById("options-button");
 const optionsMenu = document.getElementsByClassName("options-menu");
 const difficultyInput = document.getElementById("difficulty-input");
+const accelerationSelect = document.getElementById("acceleration-input");
 const mainMenuButton1 = document.getElementById("main-menu-button-1");
 const mainMenuButton2 = document.getElementById("main-menu-button-2");
 const gameInfo = document.getElementsByClassName("game-info");
@@ -24,6 +25,7 @@ let numColumns = 15;
 let snake = {};
 let gameTickID;
 let difficulty = 5;
+let difficultyAcceleration = false;
 let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
@@ -35,6 +37,7 @@ mainMenuButton1.addEventListener("click", openMainMenu);
 mainMenuButton2.addEventListener("click", openMainMenu);
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", changeDirection);
+accelerationSelect.addEventListener("change", updateDifficultyAccel);
 
 function startGame() {
     snake.body = defaultSnake.body;
@@ -235,36 +238,38 @@ function moveSnake() {
 }
 
 function changeDirection(event) {
-    const keyPressed = event.keyCode;
+    if (gameTickID !== undefined) {
+        const keyPressed = event.keyCode;
 
-    let newDirection = [];
+        let newDirection = [];
 
-    if (keyPressed === 37 || keyPressed === 65) {
-        newDirection = [0, -1]; //left
-    }
-    else if (keyPressed === 38 || keyPressed === 87) {
-        newDirection = [-1, 0]; //up
-    }
-    else if (keyPressed === 39 || keyPressed === 68) {
-        newDirection = [0, 1]; //right
-    }
-    else if (keyPressed === 40 || keyPressed === 83) {
-        newDirection = [1, 0]; //down
-    }
-    else {
-        newDirection = snake.nextDirection;
-    }
+        if (keyPressed === 37 || keyPressed === 65) {
+            newDirection = [0, -1]; //left
+        }
+        else if (keyPressed === 38 || keyPressed === 87) {
+            newDirection = [-1, 0]; //up
+        }
+        else if (keyPressed === 39 || keyPressed === 68) {
+            newDirection = [0, 1]; //right
+        }
+        else if (keyPressed === 40 || keyPressed === 83) {
+            newDirection = [1, 0]; //down
+        }
+        else {
+            newDirection = snake.nextDirection;
+        }
 
-    let snakeNeckRow = snake.body[snake.body.length - 2][0];
-    let snakeNeckColumn = snake.body[snake.body.length - 2][1];
+        let snakeNeckRow = snake.body[snake.body.length - 2][0];
+        let snakeNeckColumn = snake.body[snake.body.length - 2][1];
 
-    if (snake.body.length > 1) {
-        if (!(((snake.headLocation[0] + newDirection[0]) === (snakeNeckRow)) && ((snake.headLocation[1] + newDirection[1]) === (snakeNeckColumn)))) {
+        if (snake.body.length > 1) {
+            if (!(((snake.headLocation[0] + newDirection[0]) === (snakeNeckRow)) && ((snake.headLocation[1] + newDirection[1]) === (snakeNeckColumn)))) {
+                snake.nextDirection = newDirection;
+            }
+        }
+        else {
             snake.nextDirection = newDirection;
         }
-    }
-    else {
-        snake.nextDirection = newDirection;
     }
 }
 
@@ -289,27 +294,16 @@ function increaseScore(amount) {
 }
 
 function createApple() {
-    let badPosition = true;
-    let row;
-    let column;
-    let oldPosition = applePosition.slice(0);
+    const oldPosition = applePosition.slice(0);
+    const newPosition = findNewBlankTile(oldPosition);
 
-    while (badPosition) {
-        row = Math.floor(Math.random() * numRows);
-        column = Math.floor(Math.random() * numColumns);
-
-        badPosition = false;
-        for (let i = 0; i < snake.body.length; i++) {
-            if ((row === snake.body[i][0] && column === snake.body[i][1]) || (row === oldPosition[0] && column === oldPosition[1])) {
-                badPosition = true;
-            }
-        }
-    }
-
-    applePosition = [row, column];
+    const row = newPosition[0];
+    const column = newPosition[1];
     const cellIndex = (row * numColumns) + column;
-    const cell = document.getElementsByTagName("td")[cellIndex];
-    cell.className = "apple";
+    const tile = document.getElementsByTagName("td")[cellIndex];
+    
+    applePosition = [row, column];
+    tile.className = "apple";
 }
 
 function eatApple() {
@@ -318,6 +312,32 @@ function eatApple() {
     createApple();
 
     increaseSnakeLength(1);
+
+    if (difficultyAcceleration) {
+        accelerateDifficulty();
+    }
+}
+
+function findNewBlankTile(oldPosition) {
+    let badPosition = true;
+    let row;
+    let column;
+
+    while (badPosition) {
+        row = Math.floor(Math.random() * numRows);
+        column = Math.floor(Math.random() * numColumns);
+        
+        let cellIndex = (row * numColumns) + column;
+        let tile = document.getElementsByTagName("td")[cellIndex];
+
+        if (tile.className === "odd-tiles" || tile.className === "even-tiles") {
+            if (row != oldPosition[0] && column != oldPosition[1]) {
+                badPosition = false;
+            }
+        }
+    }
+
+    return [row,column];
 }
 
 function updateDifficulty() {
@@ -336,6 +356,25 @@ function updateDifficulty() {
     }
 
     tickSpeed = speeds[difficulty];
+}
 
+function accelerateDifficulty() {
+    tickSpeed = Math.floor(tickSpeed * .98);
     console.log(tickSpeed);
+
+    clearInterval(gameTickID);
+    gameTickID = setInterval(gameTick, tickSpeed);
+}
+
+function updateDifficultyAccel(event) {
+    let onOff = event.target.value;
+
+    if (onOff === "on") {
+        difficultyAcceleration = true;
+    }
+    else if (onOff === "off") {
+        difficultyAcceleration = false;
+    }
+
+    console.log(difficultyAcceleration);
 }

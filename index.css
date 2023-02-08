@@ -56,6 +56,10 @@ button {
     font-size: 40px;
 }
 
+#acceleration-input {
+    font-size: 40px;
+}
+
 #options-menu-block {
     display: none;
     flex-direction: column;

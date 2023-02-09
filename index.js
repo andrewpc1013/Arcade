@@ -30,6 +30,7 @@ let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
 let applePosition = [0,0];
+let snakeColors = [[0, 255, 0]];
 
 startButton.addEventListener("click", startGame);
 optionsButton.addEventListener("click", openOptionsMenu);
@@ -40,7 +41,7 @@ document.addEventListener("keydown", changeDirection);
 accelerationSelect.addEventListener("change", updateDifficultyAccel);
 
 function startGame() {
-    snake.body = defaultSnake.body;
+    snake.body = defaultSnake.body.slice(0);
     snake.nextDirection = defaultSnake.nextDirection;
     snake.length = defaultSnake.length;
     snake.headLocation = defaultSnake.headLocation;
@@ -75,6 +76,7 @@ function restartGame() {
 
 function gameTick() {
     moveSnake();
+    updateSnakeColors()
 }
 
 function createGrid(numRows, numColumns) {
@@ -162,6 +164,7 @@ function destroySnakeSegment() {
     const column = position[1];
     const cellIndex = (row * numColumns) + column;
     const cell = document.getElementsByTagName("td")[cellIndex];
+    cell.style.backgroundColor = "";
     if (cellIndex % 2) {
         cell.className = "even-tiles";
     }
@@ -360,7 +363,6 @@ function updateDifficulty() {
 
 function accelerateDifficulty() {
     tickSpeed = Math.floor(tickSpeed * .98);
-    console.log(tickSpeed);
 
     clearInterval(gameTickID);
     gameTickID = setInterval(gameTick, tickSpeed);
@@ -375,6 +377,91 @@ function updateDifficultyAccel(event) {
     else if (onOff === "off") {
         difficultyAcceleration = false;
     }
+}
 
-    console.log(difficultyAcceleration);
+function updateSnakeColors() {
+    while (snake.body.length > snakeColors.length) {
+        createNewSnakeColor();
+    }
+
+    let counter = 0;
+    for (let i = snake.body.length-1; i >= 0; i--) {
+        const red = snakeColors[counter][0];
+        const green = snakeColors[counter][1];
+        const blue = snakeColors[counter][2];
+
+        const row = snake.body[i][0];
+        const column = snake.body[i][1];
+        const cellIndex = (row * numColumns) + column;
+
+        const tile = document.getElementsByTagName("td")[cellIndex];
+        tile.style.backgroundColor = `rgb(${red},${green},${blue})`;
+        counter++;
+    }
+}
+
+function createNewSnakeColor() {
+    let lastColor = snakeColors[snakeColors.length-1];
+    let red = lastColor[0];
+    let green = lastColor[1];
+    let blue = lastColor[2];
+    let colorStep = 85;
+    const redLimit = 255 - (colorStep * 0);
+    const greenLimit = 255 - (colorStep * 0);
+    const blueLimit = 255;
+
+    if (red >= redLimit) {
+        if (blue > 0) {
+            blue -= colorStep;
+            if (blue < 0) {
+                blue = 0;
+            }
+        }
+        else if (green < greenLimit) {
+            green += colorStep;
+        }
+        else if (green === greenLimit) {
+            red -= colorStep;
+            if (red < 0) {
+                red = 0;
+            }
+        }
+    }
+    else if (green >= greenLimit) {
+        if (red > 0) {
+            red -= colorStep;
+            if (red < 0) {
+                red = 0;
+            }
+        }
+        else if (blue < blueLimit) {
+            blue += colorStep;
+        }
+        else if (blue === blueLimit) {
+            green -= colorStep
+            if (green < 0) {
+                green = 0;
+            }
+        }
+    }
+    else if (blue >= blueLimit) {
+        if (green > 0) {
+            green -= colorStep;
+            if (green < 0) {
+                green = 0;
+            }
+        }
+        else if (red < redLimit) {
+            red += colorStep;
+        }
+        else if (red === redLimit) {
+            blue -= colorStep;
+            if (blue < 0) {
+                blue = 0;
+            }
+        }
+    }
+
+    snakeColors.push([red, green, blue]);
+    console.log([red,green,blue]);
 }

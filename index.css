@@ -67,8 +67,8 @@ button {
 
 #game-area {
     background-color: white;
-    width: 500px;
-    height: 500px;
+    width: 495px;
+    height: 495px;
     border: solid white 2px;
     padding: 0px;
     display: none;
@@ -84,17 +84,6 @@ button {
     height: 100%;
     width: 100%;
 }
-
-/* #restart-button {
-    background-color: rgb(21, 21, 59);
-    border: white solid 2px;
-    padding: 10px;
-    margin: 10px;
-    font-size: 40px;
-    color: white;
-    font-family: impact;
-    display: none;
-} */
 
 tr {
     padding: 0px;
@@ -128,7 +117,8 @@ td {
 }
 
 .apple {
-    background-color: red;
+    background-color: white;
+    /* border: solid 3px red; */
 }
 
 #game-info-block {

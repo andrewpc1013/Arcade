@@ -34,7 +34,9 @@ let difficultyAcceleration = false;
 let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
-let applePosition = [0,0];
+let itemPositions = {
+    apple: [0, 0]
+}
 let snakeColors = [[0, 255, 0]];
 let wrapAroundMode = false;
 
@@ -73,7 +75,7 @@ function startGame() {
 
     createSnakeSegment(startRow, startColumn);
 
-    createApple();
+    createItem("apple");
 
     gameTickID = setInterval(gameTick, tickSpeed);
 }
@@ -229,8 +231,8 @@ function checkSelfCollision() {
     return false;
 }
 
-function checkAppleCollision() {
-    if (newRow === applePosition[0] && newColumn === applePosition[1]) {
+function checkItemCollision(item) {
+    if (newRow === itemPositions[item][0] && newColumn === itemPositions[item][1]) {
         return true;
     }
     else {
@@ -247,8 +249,10 @@ function moveSnake() {
             destroySnakeSegment();
         }
 
-        if (checkAppleCollision()) {
-            eatApple();
+        for (let item in itemPositions) {
+            if (checkItemCollision(item)) {
+                eatItem(item);
+            }
         }
 
         createSnakeSegment(newRow, newColumn);
@@ -314,8 +318,8 @@ function increaseScore(amount) {
     }
 }
 
-function createApple() {
-    const oldPosition = applePosition.slice(0);
+function createItem(item) {
+    const oldPosition = itemPositions[item].slice(0);
     const newPosition = findNewBlankTile(oldPosition);
 
     const row = newPosition[0];
@@ -323,14 +327,20 @@ function createApple() {
     const cellIndex = (row * numColumns) + column;
     const tile = document.getElementsByTagName("td")[cellIndex];
     
-    applePosition = [row, column];
-    tile.className = "apple";
+    itemPositions[item] = [row, column];
+    tile.className = `${item}`;
+}
+
+function eatItem(item) {
+    if (item === "apple") {
+        eatApple();
+    }
 }
 
 function eatApple() {
     increaseScore(1);
 
-    createApple();
+    createItem("apple");
 
     increaseSnakeLength(1);
 

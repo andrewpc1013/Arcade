@@ -4,6 +4,7 @@ const optionsButton = document.getElementById("options-button");
 const optionsMenu = document.getElementsByClassName("options-menu");
 const difficultyInput = document.getElementById("difficulty-input");
 const accelerationSelect = document.getElementById("acceleration-input");
+const wrapAroundSelect = document.getElementById("wrap-around-input");
 const mainMenuButton1 = document.getElementById("main-menu-button-1");
 const mainMenuButton2 = document.getElementById("main-menu-button-2");
 const gameInfo = document.getElementsByClassName("game-info");
@@ -22,6 +23,8 @@ const defaultSnake = {
 }
 let numRows = 15;
 let numColumns = 15;
+let newRow;
+let newColumn;
 let snake = {};
 let gameTickID;
 let difficulty = 5;
@@ -31,6 +34,7 @@ let currentScore = 0;
 let highScore = 0;
 let applePosition = [0,0];
 let snakeColors = [[0, 255, 0]];
+let wrapAroundMode = false;
 
 startButton.addEventListener("click", startGame);
 optionsButton.addEventListener("click", openOptionsMenu);
@@ -39,6 +43,7 @@ mainMenuButton2.addEventListener("click", openMainMenu);
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", changeDirection);
 accelerationSelect.addEventListener("change", updateDifficultyAccel);
+wrapAroundSelect.addEventListener("change", updateWrapAround);
 
 function startGame() {
     snake.body = defaultSnake.body.slice(0);
@@ -181,15 +186,24 @@ function increaseSnakeLength(amount) {
     snake.length += amount;
 }
 
-function checkCollision(row, column) {
-    return (checkWallCollision(row, column) || checkSelfCollision(row, column));
+function checkCollision() {
+    if (wrapAroundMode) {
+        if (checkWallCollision()) {
+            wrapAround();
+        }
+
+        return checkSelfCollision();
+    }
+    else {
+        return (checkWallCollision() || checkSelfCollision());
+    }
 }
 
-function checkWallCollision(row, column) {
-    if (row >= numRows || row < 0) {
+function checkWallCollision() {
+    if (newRow >= numRows || newRow < 0) {
         return true;
     }
-    else if (column >= numColumns || column < 0) {
+    else if (newColumn >= numColumns || newColumn < 0) {
         return true;
     }
     else {
@@ -197,13 +211,13 @@ function checkWallCollision(row, column) {
     }
 }
 
-function checkSelfCollision(row, column) {
-    if ((snake.body.length === snake.length) && (row === snake.body[0][0] && column === snake.body[0][1])) {
+function checkSelfCollision() {
+    if ((snake.body.length === snake.length) && (newRow === snake.body[0][0] && newColumn === snake.body[0][1])) {
         return false;
     }
 
     for (let i = 0; i < snake.body.length; i++) {
-        if (row === snake.body[i][0] && column === snake.body[i][1]) {
+        if (newRow === snake.body[i][0] && newColumn === snake.body[i][1]) {
             return true;
         }
     }
@@ -211,8 +225,8 @@ function checkSelfCollision(row, column) {
     return false;
 }
 
-function checkAppleCollision(row, column) {
-    if (row === applePosition[0] && column === applePosition[1]) {
+function checkAppleCollision() {
+    if (newRow === applePosition[0] && newColumn === applePosition[1]) {
         return true;
     }
     else {
@@ -221,15 +235,15 @@ function checkAppleCollision(row, column) {
 }
 
 function moveSnake() {
-    const newRow = snake.headLocation[0] + snake.nextDirection[0];
-    const newColumn = snake.headLocation[1] + snake.nextDirection[1];
+    newRow = snake.headLocation[0] + snake.nextDirection[0];
+    newColumn = snake.headLocation[1] + snake.nextDirection[1];
 
-    if (!checkCollision(newRow, newColumn)) {
+    if (!checkCollision()) {
         while (snake.body.length >= snake.length) {
             destroySnakeSegment();
         }
 
-        if (checkAppleCollision(newRow, newColumn)) {
+        if (checkAppleCollision()) {
             eatApple();
         }
 
@@ -463,5 +477,30 @@ function createNewSnakeColor() {
     }
 
     snakeColors.push([red, green, blue]);
-    console.log([red,green,blue]);
+}
+
+function updateWrapAround(event) {
+    let onOff = event.target.value;
+
+    if (onOff === "on") {
+        wrapAroundMode = true;
+    }
+    else if (onOff === "off") {
+        wrapAroundMode = false;
+    }
+}
+
+function wrapAround() {
+    if (newRow >= numRows) {
+        newRow = 0;
+    }
+    else if (newRow < 0) {
+        newRow = numRows - 1;
+    }
+    else if (newColumn >= numColumns) {
+        newColumn = 0;
+    }
+    else if (newColumn < 0) {
+        newColumn = numColumns - 1;
+    }
 }

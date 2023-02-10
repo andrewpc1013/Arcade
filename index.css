@@ -52,11 +52,7 @@ button {
     align-items: center;
 }
 
-#difficulty-input {
-    font-size: 40px;
-}
-
-#acceleration-input {
+.sub-input {
     font-size: 40px;
 }
 

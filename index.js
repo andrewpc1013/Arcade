@@ -5,6 +5,8 @@ const optionsMenu = document.getElementsByClassName("options-menu");
 const difficultyInput = document.getElementById("difficulty-input");
 const accelerationSelect = document.getElementById("acceleration-input");
 const wrapAroundSelect = document.getElementById("wrap-around-input");
+const rowsInput = document.getElementById("rows-input");
+const columnsInput = document.getElementById("columns-input");
 const mainMenuButton1 = document.getElementById("main-menu-button-1");
 const mainMenuButton2 = document.getElementById("main-menu-button-2");
 const gameInfo = document.getElementsByClassName("game-info");
@@ -54,6 +56,8 @@ function startGame() {
     scoreDisplay.innerText = `Score: ${currentScore}`;
 
     updateDifficulty();
+    updateRows();
+    updateColumns();
 
     hideElement(startMenu);
     hideElement(loseMenu);
@@ -170,7 +174,7 @@ function destroySnakeSegment() {
     const cellIndex = (row * numColumns) + column;
     const cell = document.getElementsByTagName("td")[cellIndex];
     cell.style.backgroundColor = "";
-    if (cellIndex % 2) {
+    if ((row + column) % 2) {
         cell.className = "even-tiles";
     }
     else {
@@ -503,4 +507,12 @@ function wrapAround() {
     else if (newColumn < 0) {
         newColumn = numColumns - 1;
     }
+}
+
+function updateRows() {
+    numRows = rowsInput.value;
+}
+
+function updateColumns() {
+    numColumns = columnsInput.value;
 }

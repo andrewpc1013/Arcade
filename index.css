@@ -3,6 +3,7 @@
     margin: 0px;
     padding: 0px;
     font-family: arial;
+    color: white;
 }
 
 html {
@@ -21,7 +22,7 @@ body {
 button {
     background-color: rgb(21, 21, 59);
     border: white solid 2px;
-    color: white;
+    /* color: white; */
     margin: 10px;
 }
 
@@ -29,7 +30,7 @@ button {
     display: flex;
     background-color: rgb(21, 21, 59);
     border: white solid 2px;
-    color: white;
+    /* color: white; */
     margin: 10px;
 }
 
@@ -47,13 +48,20 @@ button {
 
 .options-menu {
     padding: 10px;
-    font-size: 40px;
+    /* font-size: 40px; */
+    font-size: 4vh;
     font-family: impact;
     align-items: center;
 }
 
 .sub-input {
-    font-size: 40px;
+    /* font-size: 40px; */
+    font-size: 4vh;
+    color: black;
+}
+
+option {
+    color: black;
 }
 
 #options-menu-block {
@@ -62,9 +70,9 @@ button {
 }
 
 #game-area {
-    background-color: white;
-    width: 495px;
-    height: 495px;
+    /* background-color: white; */
+    /* width: 495px; */
+    /* height: 495px; */
     border: solid white 2px;
     padding: 0px;
     display: none;
@@ -90,10 +98,14 @@ tr {
 }
 
 td {
-    background-color: yellow;
-    color: white;
+    /* background-color: yellow; */
+    /* color: white; */
     margin: 0px;
     padding: 0px;
+    /* width: 33px; */
+    /* height: 33px; */
+    width: 4vh;
+    height: 4vh;
     flex: 1;
     display: flex;
     align-items: center;
@@ -112,23 +124,25 @@ td {
     background-color: rgb(0, 255, 0);
 }
 
-.apple {
-    background-color: white;
-    /* border: solid 3px red; */
-}
-
 #game-info-block {
     display: none;
     flex-direction: row;
 }
 
 .game-info {
-    color: white;
+    /* color: white; */
     margin: 10px;
 }
 
+.snake-status {
+    /* color: white; */
+    margin: 0px;
+    display: none;
+    font-style: italic;
+}
+
 #game-over-display {
-    color: white;
+    /* color: white; */
     text-decoration: underline;
     margin: 0px;
     display: none;
@@ -140,7 +154,7 @@ button.lose-menu {
     padding: 10px;
     margin: 10px;
     font-size: 40px;
-    color: white;
+    /* color: white; */
     font-family: impact;
     display: none;
 }

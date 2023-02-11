@@ -5,11 +5,13 @@ const optionsMenu = document.getElementsByClassName("options-menu");
 const difficultyInput = document.getElementById("difficulty-input");
 const accelerationSelect = document.getElementById("acceleration-input");
 const wrapAroundSelect = document.getElementById("wrap-around-input");
+const foodFightSelect = document.getElementById("food-fight-input");
 const rowsInput = document.getElementById("rows-input");
 const columnsInput = document.getElementById("columns-input");
 const mainMenuButton1 = document.getElementById("main-menu-button-1");
 const mainMenuButton2 = document.getElementById("main-menu-button-2");
 const gameInfo = document.getElementsByClassName("game-info");
+const snakeStatusDisplay = document.getElementById("snake-status-display");
 const scoreDisplay = document.getElementById("score-display");
 const highScoreDisplay = document.getElementById("high-score-display");
 const gameArea = document.getElementById("game-area");
@@ -29,16 +31,31 @@ let newRow;
 let newColumn;
 let snake = {};
 let gameTickID;
+let foodFightID;
+let snakeStatusID;
 let difficulty = 5;
 let difficultyAcceleration = false;
 let tickSpeed = 250;
 let currentScore = 0;
 let highScore = 0;
 let itemPositions = {
-    apple: [0, 0]
+    apple: [-1, -1],
+    pineapple: [-1, -1],
+    melon: [-1, -1],
+    greenApple: [-1, -1],
+    lemon: [-1, -1]
+}
+let itemSymbols = {
+    apple: "🍎",
+    pineapple: "🍍",
+    melon: "🍈",
+    greenApple: "🍏",
+    lemon: "🍋"
 }
 let snakeColors = [[0, 255, 0]];
 let wrapAroundMode = false;
+let foodFightMode = false;
+let poisoned = false;
 
 startButton.addEventListener("click", startGame);
 optionsButton.addEventListener("click", openOptionsMenu);
@@ -48,6 +65,7 @@ restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", changeDirection);
 accelerationSelect.addEventListener("change", updateDifficultyAccel);
 wrapAroundSelect.addEventListener("change", updateWrapAround);
+foodFightSelect.addEventListener("change", updateFoodFight);
 
 function startGame() {
     snake.body = defaultSnake.body.slice(0);
@@ -77,6 +95,11 @@ function startGame() {
 
     createItem("apple");
 
+    if (foodFightMode) {
+        showElement(snakeStatusDisplay, "self");
+        foodFightID = setInterval(foodFight, 5000);
+    }
+
     gameTickID = setInterval(gameTick, tickSpeed);
 }
 
@@ -99,6 +122,14 @@ function createGrid(numRows, numColumns) {
         numColumns = 15;
     }
 
+    let cellSize;
+    if (numRows > numColumns) {
+        cellSize = Math.floor(495 / numRows);
+    }
+    else {
+        cellSize = Math.floor(495 / numColumns);
+    }
+
     for (let i = 0; i < numRows; i++) {
         const tr = document.createElement("tr");
 
@@ -111,6 +142,10 @@ function createGrid(numRows, numColumns) {
             else {
                 td.className = "odd-tiles";
             }
+
+            td.style.width = `${cellSize}px`;
+            td.style.height = `${cellSize}px`;
+            td.style.fontSize = `${Math.floor(cellSize * .75)}px`;
 
             tr.appendChild(td);
         }
@@ -192,6 +227,14 @@ function increaseSnakeLength(amount) {
     snake.length += amount;
 }
 
+function decreaseSnakeLength(amount) {
+    if (amount === undefined) {
+        amount = 1;
+    }
+
+    snake.length -= amount;
+}
+
 function checkCollision() {
     if (wrapAroundMode) {
         if (checkWallCollision()) {
@@ -232,7 +275,10 @@ function checkSelfCollision() {
 }
 
 function checkItemCollision(item) {
-    if (newRow === itemPositions[item][0] && newColumn === itemPositions[item][1]) {
+    const cellIndex = (newRow * numColumns) + newColumn;
+    const tile = document.getElementsByTagName("td")[cellIndex];
+
+    if (tile.className === item) {
         return true;
     }
     else {
@@ -268,20 +314,39 @@ function changeDirection(event) {
 
         let newDirection = [];
 
-        if (keyPressed === 37 || keyPressed === 65) {
-            newDirection = [0, -1]; //left
-        }
-        else if (keyPressed === 38 || keyPressed === 87) {
-            newDirection = [-1, 0]; //up
-        }
-        else if (keyPressed === 39 || keyPressed === 68) {
-            newDirection = [0, 1]; //right
-        }
-        else if (keyPressed === 40 || keyPressed === 83) {
-            newDirection = [1, 0]; //down
+        if (!poisoned) {
+            if (keyPressed === 37 || keyPressed === 65) {
+                newDirection = [0, -1]; //left
+            }
+            else if (keyPressed === 38 || keyPressed === 87) {
+                newDirection = [-1, 0]; //up
+            }
+            else if (keyPressed === 39 || keyPressed === 68) {
+                newDirection = [0, 1]; //right
+            }
+            else if (keyPressed === 40 || keyPressed === 83) {
+                newDirection = [1, 0]; //down
+            }
+            else {
+                newDirection = snake.nextDirection;
+            }
         }
         else {
-            newDirection = snake.nextDirection;
+            if (keyPressed === 37 || keyPressed === 65) {
+                newDirection = [0, 1]; //right
+            }
+            else if (keyPressed === 38 || keyPressed === 87) {
+                newDirection = [1, 0]; //down
+            }
+            else if (keyPressed === 39 || keyPressed === 68) {
+                newDirection = [0, -1]; //left
+            }
+            else if (keyPressed === 40 || keyPressed === 83) {
+                newDirection = [-1, 0]; //up
+            }
+            else {
+                newDirection = snake.nextDirection;
+            }
         }
 
         let snakeNeckRow = snake.body[snake.body.length - 2][0];
@@ -300,8 +365,12 @@ function changeDirection(event) {
 
 function loseGame() {
     clearInterval(gameTickID);
+    if (foodFightMode) {
+        clearInterval(foodFightID);
+    }
 
     showElement(loseMenu);
+    hideElement(snakeStatusDisplay, "self");
 }
 
 function increaseScore(amount) {
@@ -318,6 +387,15 @@ function increaseScore(amount) {
     }
 }
 
+function decreaseScore(amount) {
+    if (amount === undefined) {
+        amount = 1;
+    }
+
+    currentScore -= amount;
+    scoreDisplay.innerText = `Score: ${currentScore}`;
+}
+
 function createItem(item) {
     const oldPosition = itemPositions[item].slice(0);
     const newPosition = findNewBlankTile(oldPosition);
@@ -329,11 +407,30 @@ function createItem(item) {
     
     itemPositions[item] = [row, column];
     tile.className = `${item}`;
+    tile.innerText = itemSymbols[`${item}`];
 }
 
 function eatItem(item) {
+    const oldCellIndex = (newRow * numColumns) + newColumn;
+    if (oldCellIndex >= 0) {
+        const oldTile = document.getElementsByTagName("td")[oldCellIndex];
+        oldTile.innerText = "";
+    }
+
     if (item === "apple") {
         eatApple();
+    }
+    else if (item === "pineapple") {
+        eatPineapple();
+    }
+    else if (item === "melon") {
+        eatMelon();
+    }
+    else if (item === "greenApple") {
+        eatGreenApple();
+    }
+    else if (item === "lemon") {
+        eatLemon();
     }
 }
 
@@ -347,6 +444,38 @@ function eatApple() {
     if (difficultyAcceleration) {
         accelerateDifficulty();
     }
+
+    changeSnakeStatusDisplay("apple: score +1");
+}
+
+function eatPineapple() {
+    if (snake.length >= 8) {
+        decreaseSnakeLength(5);
+    }
+    else {
+        decreaseSnakeLength(snake.length - 3);
+    }
+
+    changeSnakeStatusDisplay("pineapple: tail shortened");
+}
+
+function eatMelon() {
+    increaseSnakeLength(10);
+
+    changeSnakeStatusDisplay("melon: tail lengthened");
+}
+
+function eatGreenApple() {
+    decreaseScore(3);
+
+    changeSnakeStatusDisplay("green apple: score -3");
+}
+
+function eatLemon() {
+    poisoned = true;
+    setTimeout(clearPoison, 3000);
+
+    changeSnakeStatusDisplay("lemon: controls reversed!");
 }
 
 function findNewBlankTile(oldPosition) {
@@ -447,6 +576,9 @@ function createNewSnakeColor() {
         }
         else if (green < greenLimit) {
             green += colorStep;
+            if (green > 255) {
+                green = 255;
+            }
         }
         else if (green === greenLimit) {
             red -= colorStep;
@@ -464,6 +596,9 @@ function createNewSnakeColor() {
         }
         else if (blue < blueLimit) {
             blue += colorStep;
+            if (blue > 255) {
+                blue = 255;
+            }
         }
         else if (blue === blueLimit) {
             green -= colorStep
@@ -481,6 +616,9 @@ function createNewSnakeColor() {
         }
         else if (red < redLimit) {
             red += colorStep;
+            if (red > 255) {
+                red = 255;
+            }
         }
         else if (red === redLimit) {
             blue -= colorStep;
@@ -525,4 +663,46 @@ function updateRows() {
 
 function updateColumns() {
     numColumns = columnsInput.value;
+}
+
+function updateFoodFight(event) {
+    let onOff = event.target.value;
+
+    if (onOff === "on") {
+        foodFightMode = true;
+    }
+    else if (onOff === "off") {
+        foodFightMode = false;
+    }
+}
+
+function foodFight() {
+    const items = Object.keys(itemPositions);
+    let newItem = "apple";
+
+    while (newItem === "apple") {
+        newItem = items[Math.floor(items.length * Math.random())];
+    }
+
+    createItem(newItem);
+}
+
+function clearPoison() {
+    poisoned = false;
+}
+
+function clearSnakeStatusDisplay() {
+    snakeStatusDisplay.innerText = "food fight!";
+}
+
+function changeSnakeStatusDisplay(message, time) {
+    clearTimeout(snakeStatusID);
+
+    snakeStatusDisplay.innerText = message;
+
+    if (time === undefined) {
+        time = 3000;
+    }
+
+    snakeStatusID = setTimeout(clearSnakeStatusDisplay, time);
 }
